@@ -1,0 +1,271 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Loader Builder | By CanaryGen</title>
+    <style>
+        :root {
+            --background-color: #333;
+            --text-color: #fff;
+            --border-color: #555;
+            --button-background: #555;
+            --button-text: #fff;
+            --input-background: #444;
+        }
+
+        .light-mode {
+            --background-color: #fff;
+            --text-color: #000;
+            --border-color: #ccc;
+            --button-background: #007bff;
+            --button-text: #fff;
+            --input-background: #f9f9f9;
+        }
+
+        body {
+            font-family: Arial, sans-serif;
+            margin: 20px;
+            background-color: var(--background-color);
+            color: var(--text-color);
+        }
+
+        .container {
+            max-width: 600px;
+            margin: 0 auto;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+            background-color: var(--background-color);
+        }
+
+        .output {
+            margin-top: 20px;
+            padding: 10px;
+            border: 1px solid var(--border-color);
+            background-color: var(--input-background);
+            color: var(--text-color);
+            border-radius: 4px;
+            height: 200px;
+            overflow-y: auto;
+            font-family: 'Courier New', Courier, monospace;
+        }
+
+        button {
+            background-color: var(--button-background);
+            color: var(--button-text);
+            border: none;
+            padding: 10px 20px;
+            cursor: pointer;
+            margin-top: 10px;
+            border-radius: 4px;
+        }
+
+        button:hover {
+            opacity: 0.8;
+        }
+
+        select, input {
+            width: 100%;
+            padding: 10px;
+            margin: 5px 0;
+            border: 1px solid var(--border-color);
+            background-color: var(--input-background);
+            color: var(--text-color);
+            border-radius: 4px;
+        }
+
+        label {
+            display: block;
+            margin-top: 10px;
+        }
+
+        pre {
+            white-space: pre-wrap;
+            word-wrap: break-word;
+        }
+
+        .footer {
+            margin-top: 20px;
+            text-align: center;
+            font-size: 0.8em;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Loader Builder</h1>
+        <form id="generatorForm">
+            <label for="theme">Theme:</label>
+            <select id="theme" name="theme" onchange="changeTheme()">
+                <option value="dark">Dark</option>
+                <option value="light">Light</option>
+            </select>
+
+            <label for="language">Language:</label>
+            <select id="language" name="language" onchange="updateMethods()">
+                <option value="batch">Batch</option>
+                <option value="vbs">VBS</option>
+                <option value="python">Python</option>
+                <option value="bash">Bash</option>
+                <option value="csharp">C#</option>
+                <option value="ruby">Ruby</option>
+                <option value="javascript">JavaScript (Node.js)</option>
+            </select>
+
+            <label for="method">Method:</label>
+            <select id="method" name="method">
+                <!-- Options will be populated by updateMethods() -->
+            </select>
+
+            <label for="url">URL:</label>
+            <input type="text" id="url" name="url" placeholder="http://www.example.com/package.zip">
+
+            <label for="filename">Downloaded Filename:</label>
+            <input type="text" id="filename" name="filename" placeholder="file.exe">
+
+            <label for="path">Download Path:</label>
+            <input type="text" id="path" name="path" placeholder="C:\\destination\\">
+
+            <button type="button" onclick="generateCode()">Generate Code</button>
+        </form>
+
+        <div class="output" id="output"></div>
+
+        <div class="footer">
+            Loader Builder made by <a href="https://github.com/CanaryGen" target="_blank">CanaryGen</a>
+        </div>
+    </div>
+
+    <script>
+        function generateCode() {
+            const language = document.getElementById('language').value;
+            const method = document.getElementById('method').value;
+            const url = document.getElementById('url').value;
+            const filename = document.getElementById('filename').value;
+            const path = document.getElementById('path').value;
+
+            if (!isValidUrl(url)) {
+                alert('Please enter a valid URL (http:// or https://).');
+                return;
+            }
+
+            if (!isValidFilename(filename)) {
+                alert('Please enter a valid filename with extension (e.g., file.exe, image.jpg).');
+                return;
+            }
+
+            if (!isValidPath(path)) {
+                alert('Please enter a valid path.');
+                return;
+            }
+
+            // Ensure path ends with double backslash if it contains C:\Windows
+            let formattedPath = path.replace(/\\$/, ''); // Remove trailing backslash if present
+            if (formattedPath.toLowerCase().startsWith('c:\\windows')) {
+                formattedPath = formattedPath.replace(/\\/g, '\\\\') + '\\\\';
+            } else {
+                formattedPath = formattedPath + '\\';
+            }
+
+            let codeTemplate = '';
+
+            if (language === 'batch') {
+                if (method === 'powershell') {
+                    codeTemplate = `<pre><code>@echo off\nrem Generated by {website}\npowershell -Command "Invoke-WebRequest ${url} -OutFile ${formattedPath}${filename}"</code></pre>`;
+                } else if (method === 'bitsadmin') {
+                    codeTemplate = `<pre><code>@echo off\nrem Generated by {website}\nbitsadmin.exe /transfer "JobName" ${url} ${formattedPath}${filename}</code></pre>`;
+                }
+            } else if (language === 'vbs') {
+                if (method === 'arrayByteToByte') {
+                    codeTemplate = `<pre><code>' Array Byte To Byte method for VBS\n' Generated by {website}\nSub HTTPDownload( myURL, myPath )\nDim i, objFile, objFSO, objHTTP, strFile, strMsg\nConst ForReading = 1, ForWriting = 2, ForAppending = 8\nSet objFSO = CreateObject( "Scripting.FileSystemObject" )\nIf objFSO.FolderExists( myPath ) Then\n    strFile = objFSO.BuildPath( myPath, Mid( myURL, InStrRev( myURL, "/" ) + 1 ) )\nElseIf objFSO.FolderExists( Left( myPath, InStrRev( myPath, "\\" ) - 1 ) ) Then\n    strFile = myPath\nElse\n    WScript.Echo "ERROR: Target folder not found."\n    Exit Sub\nEnd If\nSet objFile = objFSO.OpenTextFile( strFile, ForWriting, True )\nSet objHTTP = CreateObject( "WinHttp.WinHttpRequest.5.1" )\nobjHTTP.Open "GET", myURL, False\nobjHTTP.Send\nFor i = 1 To LenB( objHTTP.ResponseBody )\n    objFile.Write Chr( AscB( MidB( objHTTP.ResponseBody, i, 1 ) ) )\nNext\nobjFile.Close( )\nEnd Sub\n\nHTTPDownload "${url}", "${formattedPath}${filename}"</code></pre>`;
+                }
+            } else if (language === 'python') {
+                if (method === 'requests') {
+                    codeTemplate = `<pre><code>import requests\n\nurl = "${url}"\nfilename = "${formattedPath}${filename}"\n\nresponse = requests.get(url)\nwith open(filename, "wb") as file:\n    file.write(response.content)</code></pre>`;
+                } else if (method === 'urllib') {
+                    codeTemplate = `<pre><code>import urllib.request\n\nurl = "${url}"\nfilename = "${formattedPath}${filename}"\n\nurllib.request.urlretrieve(url, filename)</code></pre>`;
+                }
+            } else if (language === 'bash') {
+                if (method === 'curl') {
+                    codeTemplate = `<pre><code>#!/bin/bash\n\nurl="${url}"\nfilename="${formattedPath}${filename}"\n\ncurl -o "$filename" "$url"</code></pre>`;
+                } else if (method === 'wget') {
+                    codeTemplate = `<pre><code>#!/bin/bash\n\nurl="${url}"\nfilename="${formattedPath}${filename}"\n\nwget -O "$filename" "$url"</code></pre>`;
+                }
+            } else if (language === 'csharp') {
+                if (method === 'httpclient') {
+                    codeTemplate = `<pre><code>using System;\nusing System.Net.Http;\nusing System.Threading.Tasks;\n\nclass Program\n{\n    static async Task Main(string[] args)\n    {\n        var url = "${url}";\n        var filename = "${formattedPath}${filename}";\n\n        using (var client = new HttpClient())\n        {\n            var response = await client.GetAsync(url);\n            response.EnsureSuccessStatusCode();\n            using (var fileStream = new FileStream(filename, FileMode.Create, FileAccess.Write, FileShare.None))\n            {\n                await response.Content.CopyToAsync(fileStream);\n            }\n        }\n    }\n}</code></pre>`;
+                }
+            } else if (language === 'ruby') {
+                if (method === 'nethttp') {
+                    codeTemplate = `<pre><code>require 'net/http'\n\nurl = URI.parse("${url}")\nfilename = "${formattedPath}${filename}"\n\nresponse = Net::HTTP.get_response(url)\nFile.open(filename, 'wb') { |file| file.write(response.body) }</code></pre>`;
+                }
+            } else if (language === 'javascript') {
+                if (method === 'request') {
+                    codeTemplate = `<pre><code>const request = require('request');\n\nconst url = "${url}";\nconst filename = "${formattedPath}${filename}";\n\nrequest(url).pipe(fs.createWriteStream(filename));</code></pre>`;
+                } else if (method === 'axios') {
+                    codeTemplate = `<pre><code>const axios = require('axios');\nconst fs = require('fs');\n\nconst url = "${url}";\nconst filename = "${formattedPath}${filename}";\n\naxios({\n  url: url,\n  method: 'GET',\n  responseType: 'stream'\n}).then(response => {\n  response.data.pipe(fs.createWriteStream(filename));\n});</code></pre>`;
+                }
+            }
+
+            document.getElementById('output').innerHTML = codeTemplate;
+        }
+
+        function changeTheme() {
+            const theme = document.getElementById('theme').value;
+            if (theme === 'dark') {
+                document.body.classList.remove('light-mode');
+            } else {
+                document.body.classList.add('light-mode');
+            }
+        }
+
+        function isValidUrl(string) {
+            try {
+                const url = new URL(string);
+                return url.protocol === 'http:' || url.protocol === 'https:';
+            } catch (_) {
+                return false;
+            }
+        }
+
+        function isValidFilename(string) {
+            return /^.+\.[a-zA-Z0-9]+$/.test(string);
+        }
+
+        function isValidPath(string) {
+            return /^[A-Za-z]:\\([^\\]+\\?)*$/.test(string);
+        }
+
+        function updateMethods() {
+            const language = document.getElementById('language').value;
+            const methodSelect = document.getElementById('method');
+            methodSelect.innerHTML = ''; // Clear existing options
+
+            if (language === 'batch') {
+                methodSelect.add(new Option('Powershell', 'powershell'));
+                methodSelect.add(new Option('Bitsadmin.exe', 'bitsadmin'));
+            } else if (language === 'vbs') {
+                methodSelect.add(new Option('Array Byte To Byte', 'arrayByteToByte'));
+            } else if (language === 'python') {
+                methodSelect.add(new Option('Requests Library', 'requests'));
+                methodSelect.add(new Option('Urllib Library', 'urllib'));
+            } else if (language === 'bash') {
+                methodSelect.add(new Option('Curl', 'curl'));
+                methodSelect.add(new Option('Wget', 'wget'));
+            } else if (language === 'csharp') {
+                methodSelect.add(new Option('HttpClient', 'httpclient'));
+            } else if (language === 'ruby') {
+                methodSelect.add(new Option('Net::HTTP', 'nethttp'));
+            } else if (language === 'javascript') {
+                methodSelect.add(new Option('Request Library', 'request'));
+                methodSelect.add(new Option('Axios Library', 'axios'));
+            }
+        }
+
+        // Set initial theme to dark
+        document.getElementById('theme').value = 'dark';
+        updateMethods(); // Initialize methods based on default language
+    </script>
+</body>
+</html>
