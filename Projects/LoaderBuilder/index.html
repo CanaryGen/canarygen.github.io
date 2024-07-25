@@ -247,12 +247,14 @@
                 methodSelect.add(new Option('Bitsadmin.exe', 'bitsadmin'));
             } else if (language === 'vbs') {
                 methodSelect.add(new Option('Array Byte To Byte', 'arrayByteToByte'));
+                alert("The code is unstable, and it is likely that the file may become corrupted during the download");
             } else if (language === 'python') {
                 methodSelect.add(new Option('Requests Library', 'requests'));
                 methodSelect.add(new Option('Urllib Library', 'urllib'));
             } else if (language === 'bash') {
                 methodSelect.add(new Option('Curl', 'curl'));
                 methodSelect.add(new Option('Wget', 'wget'));
+                alert("Bash works only in Linux (Using a Bash in Windows?)");
             } else if (language === 'csharp') {
                 methodSelect.add(new Option('HttpClient', 'httpclient'));
             } else if (language === 'ruby') {
